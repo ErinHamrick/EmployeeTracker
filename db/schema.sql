@@ -9,7 +9,7 @@ CREATE TABLE department (
     name VARCHAR(40)
     );
 
-CREATE TABLE employee_db (
+CREATE TABLE employee (
     id INT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(25),
     last_name VARCHAR(30),
