@@ -1,6 +1,7 @@
 const db = require("./db/connect");
 const inquirer = require("inquirer");
-db.query = util.promisify(db.query);
+const util = require("util");
+// db.query = util.promisify(db.query);
 
 function mainMenu() {
 	inquirer
@@ -50,6 +51,8 @@ function mainMenu() {
 		});
 }
 
+mainMenu();
+
 async function viewDepts() {
 	const depts = await db.query("SELECT * FROM employee");
 	console.table(depts);
@@ -77,8 +80,8 @@ async function viewEmployees() {
             role.salary,
             CONCAT(manager.first_name, ' ', manager.last_name) AS Manager Name
         FROM employee
-        JOINT role ON employee.role_id = role.id
-        JOINT department ON role.department_id = department.id
+        JOIN role ON employee.role_id = role.id
+        JOIN department ON role.department_id = department.id
         LEFT JOIN employee AS manager ON employee.manager_id = manager.id
             `
 	);
@@ -95,7 +98,10 @@ async function addDept() {
 		},
 	]);
 
-	await db.query(`INSERT INTO department (name) VALUES (?), department.name`);
+	await db.query(`INSERT INTO department (name) VALUES (?)`, [
+		department.name,
+	]);
+
 	console.log("Department added successfully");
 	mainMenu();
 }
@@ -192,6 +198,12 @@ async function updateRole() {
 		value: role.id,
 	}));
 
+	const roles = await db.query("SELECT * FROM role");
+	const roleOptions = roles.map((role) => ({
+		name: role.title,
+		value: role.id,
+	}));
+
 	const updateData = await inquirer.prompt([
 		{
 			type: "list",
@@ -211,8 +223,6 @@ async function updateRole() {
 		updateData.role_id,
 		updateData.employee.id,
 	]);
-	console.log("Employee role updated successfully.");
+	console.log("Employee role successfully updated.");
 	mainMenu();
 }
-
-mainMenu();
