@@ -1,7 +1,7 @@
 const db = require("./db/connect");
 const inquirer = require("inquirer");
 const util = require("util");
-// db.query = util.promisify(db.query);
+db.query = util.promisify(db.query);
 
 function mainMenu() {
 	inquirer
@@ -48,30 +48,45 @@ function mainMenu() {
 				case "Close":
 					db.end();
 			}
+		})
+		.catch((error) => {
+			console.error("Error in mainMenu:", error);
+			process.exit(1);
 		});
 }
 
 mainMenu();
 
 async function viewDepts() {
-	const depts = await db.query("SELECT * FROM employee");
-	console.table(depts);
-	mainMenu();
+	try {
+		const depts = await db.query("SELECT * FROM department");
+		console.table(depts);
+		mainMenu();
+	} catch (error) {
+		console.error("Error in viewDepts", error);
+		mainMenu();
+	}
 }
 
 async function viewRoles() {
-	const roles = await db.query(
-		`SELECT role.id, role.title, role.salary, department.name AS Department Name  
+	try {
+		const roles = await db.query(
+			`SELECT role.id, role.title, role.salary, department.name AS Department Name  
         FROM role
         JOIN department ON role.department_id = department.id`
-	);
-	console.table(roles);
-	mainMenu();
+		);
+		console.table(roles);
+		mainMenu();
+	} catch (error) {
+		console.error("Error in viewRoles", error);
+		mainMenu();
+	}
 }
 
 async function viewEmployees() {
-	const employee = await db.query(
-		`SELECT 
+	try {
+		const employee = await db.query(
+			`SELECT 
             employee.id,
             employee.first_name,
             employee.last_name,
@@ -84,63 +99,77 @@ async function viewEmployees() {
         JOIN department ON role.department_id = department.id
         LEFT JOIN employee AS manager ON employee.manager_id = manager.id
             `
-	);
-	console.table(employee);
-	mainMenu();
+		);
+		console.table(employee);
+		mainMenu();
+	} catch (error) {
+		console.error("Error in viewEmployees", error);
+		mainMenu();
+	}
 }
 
 async function addDept() {
-	const department = await inquirer.prompt([
-		{
-			type: "input",
-			name: "name",
-			message: "Enter the name of the department:",
-		},
-	]);
+	try {
+		const department = await inquirer.prompt([
+			{
+				type: "input",
+				name: "name",
+				message: "Enter the name of the department:",
+			},
+		]);
 
-	await db.query(`INSERT INTO department (name) VALUES (?)`, [
-		department.name,
-	]);
+		await db.query(`INSERT INTO department (name) VALUES (?)`, [
+			department.name,
+		]);
 
-	console.log("Department added successfully");
-	mainMenu();
+		console.log("Department added successfully");
+		mainMenu();
+	} catch (error) {
+		console.error("Error in addDept", error);
+		mainMenu();
+	}
 }
 
 async function addRole() {
-	const departments = await db.query("SELECT * FROM department");
+	try {
+		const departments = await db.query("SELECT * FROM department");
 
-	const role = await inquirer.prompt([
-		{
-			type: "input",
-			name: "name",
-			message: "Enter the name of the role:",
-		},
-		{
-			type: "input",
-			name: "salary",
-			message: "Enter the salary for the role:",
-		},
-		{
-			type: "list",
-			name: "department",
-			message: "Select the department for the role:",
-			choices: departments.map((department) => ({
-				name: department.name,
-				value: department.id,
-			})),
-		},
-	]);
-	await db.query(
-		"INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)",
-		[role.name, role.salary, role.department]
-	);
+		const role = await inquirer.prompt([
+			{
+				type: "input",
+				name: "name",
+				message: "Enter the name of the role:",
+			},
+			{
+				type: "input",
+				name: "salary",
+				message: "Enter the salary for the role:",
+			},
+			{
+				type: "list",
+				name: "department",
+				message: "Select the department for the role:",
+				choices: departments.map((department) => ({
+					name: department.name,
+					value: department.id,
+				})),
+			},
+		]);
+		await db.query(
+			"INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)",
+			[role.name, role.salary, role.department]
+		);
 
-	console.log("Role added successfully!");
-	mainMenu();
+		console.log("Role added successfully!");
+		mainMenu();
+	} catch (error) {
+		console.error("Error in addRole", error);
+		mainMenu();
+	}
 }
 
 async function addEmployee() {
-	const roles = await db.query("SELECT * FROM role");
+	try {const roles = await db.query("SELECT * FROM role");
 	const roleOptions = roles.map((role) => ({
 		name: role.title,
 		value: role.id,
@@ -188,11 +217,14 @@ async function addEmployee() {
 		]
 	);
 	console.log("Employee added successfully.");
-	mainMenu();
+	mainMenu();} catch (error){
+		console.error("Error in addEmployee", error);
+		mainMenu();
+	}
 }
 
 async function updateRole() {
-	const employees = await db.query("SELECT * FROM employee");
+	try {const employees = await db.query("SELECT * FROM employee");
 	const employeeOptions = employees.map((employee) => ({
 		name: role.title,
 		value: role.id,
@@ -224,5 +256,8 @@ async function updateRole() {
 		updateData.employee.id,
 	]);
 	console.log("Employee role successfully updated.");
-	mainMenu();
+	mainMenu();} catch (error) {
+		console.error ("Error in updateRole", error);
+		mainMenu();
+	}
 }

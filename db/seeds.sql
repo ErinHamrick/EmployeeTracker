@@ -4,7 +4,7 @@ VALUES('Administration', 'Sales', 'Service', 'Finance');
 
 
 -- INSERT INTO role (title, salary, department_id)
--- VALUES (  )
+-- VALUES ('Chief Administrator'  )
 
 
 INSERT INTO employee (
