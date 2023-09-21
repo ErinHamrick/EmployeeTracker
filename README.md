@@ -15,7 +15,7 @@ This is an Employee Management System command-line application built with Node.j
 
 ## Preview
 
-![VideoPreview]()
+![VideoPreview](https://drive.google.com/file/d/1fukZ1-0Vef_evaAh71vX5CVvO-JcqRvB/view)
 
 ## Installation
 
