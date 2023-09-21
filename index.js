@@ -71,7 +71,7 @@ async function viewDepts() {
 async function viewRoles() {
 	try {
 		const roles = await db.query(
-			`SELECT role.id, role.title, role.salary, department.name AS Department Name  
+			`SELECT role.id, role.title, role.salary, department.name AS Department  
         FROM role
         JOIN department ON role.department_id = department.id`
 		);
@@ -91,9 +91,9 @@ async function viewEmployees() {
             employee.first_name,
             employee.last_name,
             role.title,
-            department.name AS Department Name,
+            department.name AS Department,
             role.salary,
-            CONCAT(manager.first_name, ' ', manager.last_name) AS Manager Name
+            CONCAT(manager.first_name, ' ', manager.last_name) AS Manager
         FROM employee
         JOIN role ON employee.role_id = role.id
         JOIN department ON role.department_id = department.id
@@ -226,8 +226,8 @@ async function addEmployee() {
 async function updateRole() {
 	try {const employees = await db.query("SELECT * FROM employee");
 	const employeeOptions = employees.map((employee) => ({
-		name: role.title,
-		value: role.id,
+		name: employee.first_name + " " + employee.last_name,
+		value: employee.id,
 	}));
 
 	const roles = await db.query("SELECT * FROM role");
@@ -253,7 +253,7 @@ async function updateRole() {
 
 	await db.query("UPDATE employee SET role_id = ? WHERE id = ?", [
 		updateData.role_id,
-		updateData.employee.id,
+		updateData.employee_id,
 	]);
 	console.log("Employee role successfully updated.");
 	mainMenu();} catch (error) {
